@@ -1,0 +1,91 @@
+const express = require('express');
+const app = express();
+
+const hbs = require('express-handlebars');
+
+app.use(express.urlencoded({extend:true}))
+app.use( express.static('public'));
+
+app.engine('hbs', hbs({defaultLayout: 'main', extname: '.hbs'}));
+app.set('view engine', 'hbs');
+
+
+const Post = require('./app/models/Post');
+
+const post = require('./app/controllers/post.controller');
+
+app.get('/', function(req, res){
+    res.render('home', {
+        title: 'Tytuł z Express',
+        content: 'Cześć programisto'
+    });
+
+
+});
+
+app.get('/mongoose', function(req, res){
+   
+    Post.find({title: 'Post drugi'}).lean().exec(function(err, posts) {
+        console.log(posts);
+    });
+
+
+    let newPost = new Post({
+        title: 'Post czwarty',
+        content: 'Jestem postem czwartym',
+        isPublic: true
+    });
+
+    newPost.save(function(err){
+
+        console.log(err);
+        console.log('Zapisałem');
+    })
+
+
+    res.send('done');
+});
+
+
+app.get('/blog', function(req, res){
+    post.list(function(err,posts){
+        if(err)res.send(err);
+        console.log(posts);
+        res.render('blog', {posts});
+    });
+});
+
+app.get('/blog/:id', function(req, res){
+    post.get(req.params.id, function(err, post){
+        if(err) res.send(err);
+
+        res.render('blog', post);
+    })
+});
+
+
+app.get
+
+app.listen(8080, function(){
+    console.log('Serwer Node.js działa');
+});
+
+app.get('/blog/post/add', function(req, res){
+    res.render('add_post')
+});
+
+app.post('/blog/post/add', function(req, res){
+   
+    post.add(req.body, function(err, post){
+        if(err) res.send(err);
+        res.redirect('/blog')
+    })
+});
+
+/*app.get('/blog/:id?', function(req, res){
+    res.render('blog', {
+        title: 'Tytuł posta',
+        content: 'Treść posta',
+        id: req.params.id
+    });
+});  */
